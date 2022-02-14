@@ -9,7 +9,7 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 
 ## Features
 
-* FetchLocalFF returns the data which is exist on Firestore but not in Sql Lite with the onFinished function.
+* FetchLocalFF returns the data which exists on Firestore but not in Sql Lite with the onFinished function.
 * FetchLocalFF provide service that if some data is updated on Firestore; the data which is already exist on SQL Lite will be updated as well.
 
 

@@ -19,10 +19,7 @@ dev_dependencies:
   mean_lib:
     git:
       url: https://github.com/meanllbrl/library.git
-  
-  local_db_helper:
-    git:
-      url: https://github.com/meanllbrl/localDbService.git
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

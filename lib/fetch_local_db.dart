@@ -3,10 +3,9 @@ import 'package:fetch_local_db/models/firebaseInfo.dart';
 import 'package:fetch_local_db/models/localInfo.dart';
 import 'package:fetch_local_db/models/updateModel.dart';
 import 'package:flutter/material.dart';
-import 'package:local_db_helper/local_db_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mean_lib/logger.dart';
-
+import 'package:mean_lib/local_db_helper.dart';
 
 
 class FetchLocalFF {

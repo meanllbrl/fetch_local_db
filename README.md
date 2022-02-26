@@ -21,13 +21,61 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 * For update control (checks if hosted data matches local data), UpdateModel must be initialized.
 * UpdateModel/localCompParam must be an integer not Timestamp. If Timestamp is used, milliseconssinceach... should be given.
 
+## Semantic
+
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+* With this usage, data which exist in firestore and not exist on local database will be returned with onFinished method. Note: The possible updates which happened out of application lifecyle will not checked in the usage!
 
 ```dart
-const like = 'sample';
+    FetchLocalFF _fetch = FetchLocalFF(
+         // compared params is date
+        isItDate: false,
+        //local database informations(SQL-LITE)
+        localDatabase:
+            LocalInfos(tableName: "tableName", compParam: "index"),
+        fbDatabase:
+            FirebaseInfos(collectionName: "collectionName", compParam: "index"),
+        onFinished: (value, skippes) async {
+          //firebasede olup lokal databasde olmayan veriler dönüyor
+        });
+    await _fetch.fetch();
+```
+
+* With this usage, as an addition the updates(out of app lifecycle) will be also checked, and if some updated docs exist; the docs will be replaced with updated ones.
+
+```dart
+    FetchLocalFF _fetch = FetchLocalFF(
+         //if the upDateModel is given; possible updates will be checked
+         updateModel: UpdateModel(
+            insertDataWithFBDocs: (value) {
+              //the method which insert firebase docs to sql database should be given here
+            },
+            //local primary key
+            localTableId: "id",
+            //firebase primary key
+            fbDocId: "id",
+            //the field which only be exist on updated docs
+            fbCompParam: "updateDate",
+            //table creation attribute
+            localCompParam: "createdAt",
+            //firebase query can be given manuelly, if not the query will order the collection with fbCompParam
+            fbQuery: _data
+                .collection("giveAways")
+                .where("isFinished", isEqualTo: true)
+                .orderBy("updateDate")
+                .get()),
+         // compared params is date
+        isItDate: false,
+        //local database informations(SQL-LITE)
+        localDatabase:
+            LocalInfos(tableName: "tableName", compParam: "index"),
+        fbDatabase:
+            FirebaseInfos(collectionName: "collectionName", compParam: "index"),
+        onFinished: (value, skippes) async {
+          //firebasede olup lokal databasde olmayan veriler dönüyor
+        });
+    await _fetch.fetch();
 ```
 
 ## Additional information

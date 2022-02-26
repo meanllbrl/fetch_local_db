@@ -29,7 +29,7 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 
 ```dart
     FetchLocalFF _fetch = FetchLocalFF(
-         // compared params is date
+         // if local comp param is stored as millisecondsinceach...
         isItDate: false,
         //local database informations(SQL-LITE)
         localDatabase:
@@ -37,7 +37,7 @@ This package is a solution for preventing heavy Firebase usage to have decreased
         fbDatabase:
             FirebaseInfos(collectionName: "collectionName", compParam: "index"),
         onFinished: (value, skippes) async {
-          //firebasede olup lokal databasde olmayan veriler dönüyor
+          //fThe data which exist on Firebase and doesn't on Local
         });
     await _fetch.fetch();
 ```
@@ -59,22 +59,14 @@ This package is a solution for preventing heavy Firebase usage to have decreased
             fbCompParam: "updateDate",
             //table creation attribute
             localCompParam: "createdAt",
-            //firebase query can be given manuelly, if not the query will order the collection with fbCompParam
+            //firebase query can be given manuelly; if not, the query will order the collection with fbCompParam
             fbQuery: _data
                 .collection("giveAways")
                 .where("isFinished", isEqualTo: true)
                 .orderBy("updateDate")
                 .get()),
-         // compared params is date
-        isItDate: false,
-        //local database informations(SQL-LITE)
-        localDatabase:
-            LocalInfos(tableName: "tableName", compParam: "index"),
-        fbDatabase:
-            FirebaseInfos(collectionName: "collectionName", compParam: "index"),
-        onFinished: (value, skippes) async {
-          //firebasede olup lokal databasde olmayan veriler dönüyor
-        });
+         ...
+       );
     await _fetch.fetch();
 ```
 

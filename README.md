@@ -22,6 +22,7 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 * UpdateModel/localCompParam must be an integer not Timestamp. If Timestamp is used, milliseconssinceach... should be given.
 
 ## Semantic
+![Untitled Diagram drawio](https://user-images.githubusercontent.com/83311854/155860360-26652368-885a-4182-95fb-77cb4855c835.png)
 
 ## Usage
 

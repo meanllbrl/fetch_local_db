@@ -25,8 +25,8 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 * Getting New Data Which Only Doesn't Exist On SQL-Lite(Local Database)
 ![Untitled Diagram drawio](https://user-images.githubusercontent.com/83311854/155860360-26652368-885a-4182-95fb-77cb4855c835.png)
 
-* STEP 1: System asks Local Database to return ( if comparision type is DATE ) latest data row creation date.
-* STEP 2: Local Database returns latest date or biggest index.
+STEP 1: System asks Local Database to return ( if comparision type is DATE ) latest data row creation date.<br />
+STEP 2: Local Database returns latest date or biggest index.
 * STEP 3: System send request of data which is newer from local latest date.
 * STEP 4: Firebase returns the docs which are newer.
 * STEP 5: System gets returned new data and insert them into Local Database.

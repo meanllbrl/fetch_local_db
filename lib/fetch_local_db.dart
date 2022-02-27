@@ -83,7 +83,7 @@ class FetchLocalFF {
                 .collection(fbDatabase.collectionName)
                 .orderBy(updateModel!.fbCompParam)
                 .get())
-                .then((docsWithUpdateComp) {
+                .then((docsWithUpdateComp)async {
               print(
                   "*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
               try {

@@ -1,4 +1,5 @@
 library fetch_local_db;
+
 import 'package:fetch_local_db/models/firebaseInfo.dart';
 import 'package:fetch_local_db/models/localInfo.dart';
 import 'package:fetch_local_db/models/updateModel.dart';
@@ -6,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mean_lib/logger.dart';
 import 'package:mean_lib/local_db_helper.dart';
-
 
 class FetchLocalFF {
   //firestore instance for some processes
@@ -26,15 +26,16 @@ class FetchLocalFF {
   final Future<void> Function(
       QuerySnapshot<Map<String, dynamic>> value, List<String> skips) onFinished;
   //the firebase query can be given
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function(dynamic compElement)? fbQuery;
+  final Future<QuerySnapshot<Map<String, dynamic>>> Function(
+      dynamic compElement)? fbQuery;
 
   FetchLocalFF(
       {required this.isItDate,
-        this.updateModel,
-        this.fbQuery,
-        required this.localDatabase,
-        required this.fbDatabase,
-        required this.onFinished});
+      this.updateModel,
+      this.fbQuery,
+      required this.localDatabase,
+      required this.fbDatabase,
+      required this.onFinished});
 
   //this class for fetching local database from firebase
   //it returns to functionality of getting missing data on local database
@@ -58,15 +59,17 @@ class FetchLocalFF {
     }
     List<String> skipWhileInserting = [];
     //firebase query
-    await(fbQuery!=null ? fbQuery!(comparisionElement) : _db
-        .collection(fbDatabase.collectionName)
-        .where(fbDatabase.compParam, isGreaterThan: comparisionElement)
-        .get())
+    await (fbQuery != null
+            ? fbQuery!(comparisionElement)
+            : _db
+                .collection(fbDatabase.collectionName)
+                .where(fbDatabase.compParam, isGreaterThan: comparisionElement)
+                .get())
         .then((newDocs) async {
       //returned the values which hosted database has and local hasn't
       if (updateModel == null) {
         await onFinished(newDocs, skipWhileInserting);
-      } 
+      }
       //if update model is not null
       else {
         Logger.warning("the databases have to have updateDate param");
@@ -75,15 +78,16 @@ class FetchLocalFF {
           //getting table data
           List theData = await _local.read(
               parameters:
-              "${updateModel!.localCompParam} AS comp,${updateModel!.localTableId} AS id",
+                  "${updateModel!.localCompParam} AS comp,${updateModel!.localTableId} AS id",
               tableName: localDatabase.tableName);
           //getting dcs which has firebase comparision params
-          if (theData.isNotEmpty) {
-            await (updateModel!.fbQuery ??  _db
-                .collection(fbDatabase.collectionName)
-                .orderBy(updateModel!.fbCompParam)
-                .get())
-                .then((docsWithUpdateComp)async {
+          if (theData[0].isNotEmpty) {
+            await (updateModel!.fbQuery ??
+                    _db
+                        .collection(fbDatabase.collectionName)
+                        .orderBy(updateModel!.fbCompParam)
+                        .get())
+                .then((docsWithUpdateComp) async {
               print(
                   "*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
               try {
@@ -92,7 +96,10 @@ class FetchLocalFF {
                   //getting the data which is old and from local database
                   Map<String, dynamic>? singleDoc = theData[0]
                       .where((element) =>
-                  element["id"] == (updateModel!.fbDocId != null ? fb[updateModel!.fbDocId!] : fb.id))
+                          element["id"] ==
+                          (updateModel!.fbDocId != null
+                              ? fb[updateModel!.fbDocId!]
+                              : fb.id))
                       .first;
                   print("singledoc: " + singleDoc.toString());
                   if (singleDoc != null) {
@@ -108,13 +115,14 @@ class FetchLocalFF {
                       _local.delete(
                           tableName: localDatabase.tableName,
                           whereStatement:
-                          "WHERE ${updateModel!.localTableId} ='${singleDoc["id"]}'");
+                              "WHERE ${updateModel!.localTableId} ='${singleDoc["id"]}'");
                       print("*****UPDATE CONTROL: ADDING TO LOCAL");
                       //adding to local
                       updateModel!.insertDataWithFBDocs([fb]);
                     }
                   }
                 });
+              print("iş bitti");
               } catch (e) {
                 print("update control error ${e.toString()}");
               }
@@ -125,7 +133,7 @@ class FetchLocalFF {
             await onFinished(newDocs, skipWhileInserting);
           }
         } catch (e) {
-          print("*****UPDATE CONTROL: ERROR${e.toString()}");
+          print("*****UPDATE CONTROL: ERROR  ${e.toString()}");
         }
       }
     });

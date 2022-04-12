@@ -22,7 +22,7 @@ This package is a solution for preventing heavy Firebase usage to have decreased
 * UpdateModel/localCompParam must be an integer not Timestamp. If Timestamp is used, milliseconssinceach... should be given.
 
 ## Semantic
-* Getting New Data Which Only Doesn't Exist On SQL-Lite(Local Database)
+* Getting New Data Which Don't Exist In SQL-Lite(Local Database)
 ![Untitled Diagram drawio](https://user-images.githubusercontent.com/83311854/155860360-26652368-885a-4182-95fb-77cb4855c835.png)
 
 *STEP 1*: System asks Local Database to return ( if comparision type is DATE ) latest data row creation date.<br />
@@ -81,8 +81,3 @@ This package is a solution for preventing heavy Firebase usage to have decreased
     await _fetch.fetch();
 ```
 
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.

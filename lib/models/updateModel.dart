@@ -12,7 +12,7 @@ class UpdateModel {
   //the function which gets the firebase docs and insert into the table
   final Function(List docs) insertDataWithFBDocs;
   //the firebase query can be given
-  final Future<QuerySnapshot<Map<String, dynamic>>>? fbQuery;
+  final Future<QuerySnapshot>? fbQuery;
   UpdateModel(
       {required this.insertDataWithFBDocs,
         this.fbDocId,

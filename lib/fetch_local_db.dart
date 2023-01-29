@@ -24,9 +24,9 @@ class FetchLocalFF {
   final UpdateModel? updateModel;
   //the function will be triggered when process ok
   final Future<void> Function(
-      QuerySnapshot<Map<String, dynamic>> value, List<String> skips) onFinished;
+      QuerySnapshot value, List<String> skips) onFinished;
   //the firebase query can be given
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function(
+  final Future<QuerySnapshot> Function(
       dynamic compElement)? fbQuery;
 
   FetchLocalFF(

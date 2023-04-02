@@ -3,6 +3,7 @@ library fetch_local_db;
 import 'package:fetch_local_db/models/firebaseInfo.dart';
 import 'package:fetch_local_db/models/localInfo.dart';
 import 'package:fetch_local_db/models/updateModel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mean_lib/logger.dart';
@@ -10,9 +11,9 @@ import 'package:mean_lib/local_db_helper.dart';
 
 class FetchLocalFF {
   //firestore instance for some processes
-  FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   //local database service object for proccesses
-  LocalDBService _local = LocalDBService(name: "batch.db");
+  final LocalDBService _local = LocalDBService(name: "batch.db");
 
   //this LocalInfos is the atr which will be used to compare local db and firebase
   final LocalInfos localDatabase;
@@ -23,11 +24,10 @@ class FetchLocalFF {
   //this param is for enabling looking for updated values on db
   final UpdateModel? updateModel;
   //the function will be triggered when process ok
-  final Future<void> Function(
-      QuerySnapshot value, List<String> skips) onFinished;
+  final Future<void> Function(QuerySnapshot value, List<String> skips)
+      onFinished;
   //the firebase query can be given
-  final Future<QuerySnapshot> Function(
-      dynamic compElement)? fbQuery;
+  final Future<QuerySnapshot> Function(dynamic compElement)? fbQuery;
 
   FetchLocalFF(
       {required this.isItDate,
@@ -74,7 +74,9 @@ class FetchLocalFF {
       else {
         Logger.warning("the databases have to have updateDate param");
         try {
-          print("*****UPDATE CONTROL: BEGINS");
+          if (kDebugMode) {
+            print("*****UPDATE CONTROL: BEGINS");
+          }
           //getting table data
           List theData = await _local.read(
               parameters:
@@ -88,11 +90,13 @@ class FetchLocalFF {
                         .orderBy(updateModel!.fbCompParam)
                         .get())
                 .then((docsWithUpdateComp) async {
-              print(
-                  "*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
+              if (kDebugMode) {
+                print(
+                    "*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
+              }
               try {
                 //for each docs with has update compairision fields
-                docsWithUpdateComp.docs.forEach((fb) async {
+                for (var fb in docsWithUpdateComp.docs) {
                   //getting the data which is old and from local database
                   Map<String, dynamic>? singleDoc = theData[0]
                       .where((element) =>
@@ -101,7 +105,9 @@ class FetchLocalFF {
                               ? fb[updateModel!.fbDocId!]
                               : fb.id))
                       .first;
-                  print("singledoc: " + singleDoc.toString());
+                  if (kDebugMode) {
+                    print("singledoc: " + singleDoc.toString());
+                  }
                   if (singleDoc != null) {
                     //the skip list is for developer to skip insert same doc again
                     skipWhileInserting.add(singleDoc["id"]);
@@ -110,21 +116,29 @@ class FetchLocalFF {
                         fb[updateModel!.fbCompParam]
                             .toDate()
                             .millisecondsSinceEpoch) {
-                      print("*****UPDATE CONTROL: DELETING FROM LOCAL");
+                      if (kDebugMode) {
+                        print("*****UPDATE CONTROL: DELETING FROM LOCAL");
+                      }
                       //firstly deeting from local
                       _local.delete(
                           tableName: localDatabase.tableName,
                           whereStatement:
                               "WHERE ${updateModel!.localTableId} ='${singleDoc["id"]}'");
-                      print("*****UPDATE CONTROL: ADDING TO LOCAL");
+                      if (kDebugMode) {
+                        print("*****UPDATE CONTROL: ADDING TO LOCAL");
+                      }
                       //adding to local
                       updateModel!.insertDataWithFBDocs([fb]);
                     }
                   }
-                });
-              print("iş bitti");
+                }
+                if (kDebugMode) {
+                  print("iş bitti");
+                }
               } catch (e) {
-                print("update control error ${e.toString()}");
+                if (kDebugMode) {
+                  print("update control error ${e.toString()}");
+                }
               }
             }).then((value) async {
               await onFinished(newDocs, skipWhileInserting);
@@ -133,7 +147,9 @@ class FetchLocalFF {
             await onFinished(newDocs, skipWhileInserting);
           }
         } catch (e) {
-          print("*****UPDATE CONTROL: ERROR  ${e.toString()}");
+          if (kDebugMode) {
+            print("*****UPDATE CONTROL: ERROR  ${e.toString()}");
+          }
         }
       }
     });
@@ -144,7 +160,9 @@ class FetchLocalFF {
       List theData = await _local.read(
           parameters: localDatabase.compParam,
           tableName: localDatabase.tableName,
-          lastStatement: "ORDER BY ${localDatabase.compParam} DESC LIMIT 1");
+          lastStatement: localDatabase.primaryKeyField != null
+              ? "${localDatabase.primaryKeyField}='${localDatabase.primaryKeyValue.toString()}' ORDER BY ${localDatabase.compParam} DESC LIMIT 1"
+              : "ORDER BY ${localDatabase.compParam} DESC LIMIT 1");
       return theData[0][0][localDatabase.compParam];
     } catch (e) {
       Logger.bigError(e.toString());

@@ -1,83 +1,109 @@
+# Fetch Local Database Package
 
-This package is a solution for preventing heavy Firebase usage to have decreased Google bills. Solution is simply, request data from Firestore which is not exist on SQL Lite service. As a conclusion the doc count that we get from Firestore will be minimized.
-
-- But What İf The Data Which Already Writed On SQL Lite, Updated Somehow?
-    * Because the data already exist, the package will not get the old data from Firebase.
-    * Some users will have old data that not fits with the updated one.
-
-+ As a solution, this package(if user entered an UpdateModel) checks some docs that have special fields to look if local and hosted databases matches. If not, the local data will be updated on SQL Lite service.
+This package is designed to help reduce Firebase usage and lower Google bills by efficiently managing data synchronization between Firestore and a local SQLite database. It primarily focuses on fetching data from Firestore that is missing in the local SQLite database, reducing the Firestore document count.
 
 ## Features
 
-* FetchLocalFF returns the data which exists on Firestore but not in Sql Lite with the onFinished function.
-* FetchLocalFF provide service that if some data is updated on Firestore; the data which is already exist on SQL Lite will be updated as well.
+- SqlLiteFirestoreBridge retrieves data from Firestore that is not present in the local SQLite database using the `onFinished` function.
+- It provides a mechanism for updating local data in response to changes in Firestore, ensuring data consistency between the two databases.
 
+## Getting Started
 
+To use this package, you need to ensure the following prerequisites:
 
-## Getting started
+- Firebase must be successfully installed and configured in your Flutter project.
+- If the comparison parameter is not of type `DATE` or `TIMESTAMP`, set the `isItDate` parameter to `false`.
+- For update control, where the package checks if hosted data matches local data, you must initialize an `UpdateModel`.
+- The `localCompParam` in the `UpdateModel` must be of integer type and not a `Timestamp`. If using `Timestamp`, ensure the conversion to milliseconds since epoch is provided.
 
-* Firebase must be installed successfully!
-* If comparision parameter is not DATE or TIMESTAMP, isItDate must be false.
-* For update control (checks if hosted data matches local data), UpdateModel must be initialized.
-* UpdateModel/localCompParam must be an integer not Timestamp. If Timestamp is used, milliseconssinceach... should be given.
+## Semantic Overview
 
-## Semantic
-* Getting New Data Which Don't Exist In SQL-Lite(Local Database)
-![Untitled Diagram drawio](https://user-images.githubusercontent.com/83311854/155860360-26652368-885a-4182-95fb-77cb4855c835.png)
+![Semantic Diagram](https://user-images.githubusercontent.com/83311854/155860360-26652368-885a-4182-95fb-77cb4855c835.png)
 
-*STEP 1*: System asks Local Database to return ( if comparision type is DATE ) latest data row creation date.<br />
-*STEP 2*: Local Database returns latest date or biggest index.<br />
-*STEP 3*: System send request of data which is newer from local latest date.<br />
-*STEP 4*: Firebase returns the docs which are newer.<br />
-*STEP 5*: System gets returned new data and insert them into Local Database.<br />
-*STEP 6*: System read all local data and write 'em to Provider.<br />
+1. The system requests the local database to return the latest data row creation date if the comparison type is `DATE`.
+2. The local database returns the latest date or the largest index.
+3. The system sends a request for data that is newer than the local latest date to Firebase.
+4. Firebase returns the documents that are newer.
+5. The system retrieves the newly returned data and inserts it into the local database.
+6. The system reads all local data and writes it to a provider or other state management solution.
 
-*LIFE CYCLE*: In the life-cycle we don't send any get request, and handle states locally. The changes will be set on Firebase and SQL-lite as well.
+## Detailed Flow
+
+The Fetch Local Database package follows a specific flow to efficiently manage data synchronization between Firestore and the local SQLite database. This flow can be summarized as follows:
+
+1. **Initialization**:
+   - Configure the `SqlLiteFirestoreBridge` instance with the necessary parameters, including database information, comparison types, and update control settings.
+
+2. **Local Database Check**:
+   - Determine the comparison element based on whether it's a date or not. If data exists in the local database, retrieve the latest date or the largest index as the comparison element.
+   - If the comparison parameter is of type `DATE`, the package handles date conversion and validation.
+
+3. **Firestore Query**:
+   - Query Firestore to retrieve documents that have a comparison element greater than the one in the local database.
+   - You can also use a custom Firestore query function if provided via `fbQuery`.
+
+4. **Data Retrieval and Insertion**:
+   - Retrieve the new documents returned from Firestore.
+   - Insert these new documents into the local SQLite database.
+
+5. **Update Control (Optional)**:
+   - If an `UpdateModel` is provided, the package performs additional checks for updates.
+   - The `UpdateModel` includes settings for local and Firebase comparison parameters, primary keys, and custom Firebase queries.
+   - It checks if hosted data matches local data and updates the local database if necessary.
+
+6. **Completion**:
+   - Once the synchronization process is complete, the `onFinished` callback function is triggered, passing the retrieved Firestore documents and a list of skipped document IDs.
+
+7. **Data Consumption**:
+   - With the updated local database, the application can consume data as needed, ensuring that it has the latest information from both Firestore and the local SQLite database.
+
+This flow ensures that data is efficiently managed between Firestore and the local SQLite database, reducing Firebase usage and improving data consistency.
+
 
 ## Usage
 
-* With this usage, data which exist in firestore and not exist on local database will be returned with onFinished method. Note: The possible updates which happened out of application lifecyle will not checked in the usage!
+### Basic Usage
+
+In this example, data that exists in Firestore but is missing in the local database will be returned with the `onFinished` method. Please note that updates that occurred outside the application lifecycle are not checked.
 
 ```dart
-    FetchLocalFF _fetch = FetchLocalFF(
-         // if local comp param is stored as millisecondsinceach...
-        isItDate: false,
-        //local database informations(SQL-LITE)
-        localDatabase:
-            LocalInfos(tableName: "tableName", compParam: "index"),
-        fbDatabase:
-            FirebaseInfos(collectionName: "collectionName", compParam: "index"),
-        onFinished: (value, skippes) async {
-          //fThe data which exist on Firebase and doesn't on Local
-        });
-    await _fetch.fetch();
-```
+SqlLiteFirestoreBridge _fetch = SqlLiteFirestoreBridge(
+   // If the local comparison parameter is stored as milliseconds since epoch...
+  isItDate: false,
+  // Local database information (SQLite)
+  localDatabase: LocalInfos(tableName: "tableName", compParam: "index"),
+  fbDatabase: FirebaseInfos(collectionName: "collectionName", compParam: "index"),
+  onFinished: (value, skips) async {
+    // The data that exists on Firebase and doesn't exist in the local database
+  }
+);
+await _fetch.fetch();
 
-* With this usage, as an addition the updates(out of app lifecycle) will be also checked, and if some updated docs exist; the docs will be replaced with updated ones.
+### Advanced Usage
 
-```dart
-    FetchLocalFF _fetch = FetchLocalFF(
-         //if the upDateModel is given; possible updates will be checked
-         updateModel: UpdateModel(
-            insertDataWithFBDocs: (value) {
-              //the method which insert firebase docs to sql database should be given here
-            },
-            //local primary key
-            localTableId: "id",
-            //firebase primary key
-            fbDocId: "id",
-            //the field which only be exist on updated docs
-            fbCompParam: "updateDate",
-            //table creation attribute
-            localCompParam: "createdAt",
-            //firebase query can be given manuelly; if not, the query will order the collection with fbCompParam
-            fbQuery: _data
-                .collection("giveAways")
-                .where("isFinished", isEqualTo: true)
-                .orderBy("updateDate")
-                .get()),
-         ...
-       );
-    await _fetch.fetch();
-```
+In this example, in addition to fetching missing data, updates (outside the app lifecycle) are also checked. If some updated documents exist, they will be replaced with the updated ones.
+
+SqlLiteFirestoreBridge _fetch = SqlLiteFirestoreBridge(
+   // If the updateModel is provided, possible updates will be checked
+   updateModel: UpdateModel(
+      insertDataWithFBDocs: (value) {
+        // The method that inserts Firebase documents into the SQL database should be provided here
+      },
+      // Local primary key
+      localTableId: "id",
+      // Firebase primary key
+      fbDocId: "id",
+      // The field that only exists in updated documents
+      fbCompParam: "updateDate",
+      // Table creation attribute
+      localCompParam: "createdAt",
+      // A custom Firebase query can be provided manually; if not, the query will order the collection with fbCompParam
+      fbQuery: _data
+          .collection("giveAways")
+          .where("isFinished", isEqualTo: true)
+          .orderBy("updateDate")
+          .get()),
+   ...
+);
+await _fetch.fetch();
 

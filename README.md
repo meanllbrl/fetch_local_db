@@ -1,6 +1,6 @@
 # Fetch Local Database Package
 
-This package is designed to help reduce Firebase usage and lower Google bills by efficiently managing data synchronization between Firestore and a local SQLite database. It primarily focuses on fetching data from Firestore that is missing in the local SQLite database, reducing the Firestore document count.
+This package is designed to help reduce Firebase usage and lower Google bills by efficiently managing data synchronization between Firestore and a local SQLite database. It primarily focuses on fetching data from Firestore that is missing in the local SQLite database, reducing the Firestore document read count.
 
 ## Features
 
@@ -78,11 +78,13 @@ SqlLiteFirestoreBridge _fetch = SqlLiteFirestoreBridge(
   }
 );
 await _fetch.fetch();
+```
 
-### Advanced Usage
+### Detailed Usage
 
 In this example, in addition to fetching missing data, updates (outside the app lifecycle) are also checked. If some updated documents exist, they will be replaced with the updated ones.
 
+```dart
 SqlLiteFirestoreBridge _fetch = SqlLiteFirestoreBridge(
    // If the updateModel is provided, possible updates will be checked
    updateModel: UpdateModel(
@@ -106,4 +108,5 @@ SqlLiteFirestoreBridge _fetch = SqlLiteFirestoreBridge(
    ...
 );
 await _fetch.fetch();
+```
 

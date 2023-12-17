@@ -1,9 +1,10 @@
+import 'dart:developer';
+
 import 'package:fetch_local_db/models/firebaseInfo.dart';
 import 'package:fetch_local_db/models/localInfo.dart';
 import 'package:fetch_local_db/models/updateModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mean_lib/logger.dart';
 import 'package:mean_lib/local_db_helper.dart';
 
 /// A class for bridging Firestore and local SQLite databases.
@@ -83,10 +84,10 @@ class SqlLiteFirestoreBridge {
         await onFinished(newDocs, skipWhileInserting);
       } else {
         //looking for updated document
-        Logger.warning("the databases have to have updateDate param");
+        log("the databases have to have updateDate param");
         try {
           if (kDebugMode) {
-            Logger.log("*****UPDATE CONTROL: BEGINS");
+            log("*****UPDATE CONTROL: BEGINS");
           }
           List theData = await _local.read(
             parameters:
@@ -102,8 +103,7 @@ class SqlLiteFirestoreBridge {
             //getting the update potentialed data
             await updateLookingFirebaseQuery.then((docsWithUpdateComp) async {
               if (kDebugMode) {
-                Logger.log(
-                    "*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
+                log("*****UPDATE CONTROL: THE DOCS WHICH HAS UP. PARAM (${docsWithUpdateComp.docs.length})");
               }
               try {
                 for (var fb in docsWithUpdateComp.docs) {
@@ -115,7 +115,7 @@ class SqlLiteFirestoreBridge {
                               : fb.id))
                       .first;
                   if (kDebugMode) {
-                    Logger.log("singledoc: " + singleDoc.toString());
+                    log("singledoc: " + singleDoc.toString());
                   }
                   if (singleDoc != null) {
                     skipWhileInserting.add(singleDoc["id"]);
@@ -124,7 +124,7 @@ class SqlLiteFirestoreBridge {
                             .toDate()
                             .millisecondsSinceEpoch) {
                       if (kDebugMode) {
-                        Logger.log("*****UPDATE CONTROL: DELETING FROM LOCAL");
+                        log("*****UPDATE CONTROL: DELETING FROM LOCAL");
                       }
                       _local.delete(
                         tableName: localDatabase.tableName,
@@ -132,18 +132,18 @@ class SqlLiteFirestoreBridge {
                             "WHERE ${updateModel!.localTableId} ='${singleDoc["id"]}'",
                       );
                       if (kDebugMode) {
-                        Logger.log("*****UPDATE CONTROL: ADDING TO LOCAL");
+                        log("*****UPDATE CONTROL: ADDING TO LOCAL");
                       }
                       updateModel!.insertDataWithFBDocs([fb]);
                     }
                   }
                 }
                 if (kDebugMode) {
-                  Logger.log("iş bitti");
+                  log("iş bitti");
                 }
               } catch (e) {
                 if (kDebugMode) {
-                  Logger.log("update control error ${e.toString()}");
+                  log("update control error ${e.toString()}");
                 }
               }
             }).then((value) async {
@@ -154,7 +154,7 @@ class SqlLiteFirestoreBridge {
           }
         } catch (e) {
           if (kDebugMode) {
-            Logger.log("*****UPDATE CONTROL: ERROR  ${e.toString()}");
+            log("*****UPDATE CONTROL: ERROR  ${e.toString()}");
           }
         }
       }
@@ -181,7 +181,7 @@ class SqlLiteFirestoreBridge {
       );
       return theData[0][0][localDatabase.compParam];
     } catch (e) {
-      Logger.bigError(e.toString());
+      log(e.toString());
       throw ErrorDescription("Local Database _getBiggest crashed!!!");
     }
   }
@@ -205,7 +205,7 @@ class SqlLiteFirestoreBridge {
       );
       return theData[0][0]["total"];
     } catch (e) {
-      Logger.bigError(e.toString());
+      log(e.toString());
       throw ErrorDescription("Local Database get count crashed!!!");
     }
   }

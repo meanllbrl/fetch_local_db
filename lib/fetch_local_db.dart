@@ -1,12 +1,13 @@
 library fetch_local_db;
 
+import 'dart:developer';
+
 import 'package:fetch_local_db/models/firebaseInfo.dart';
 import 'package:fetch_local_db/models/localInfo.dart';
 import 'package:fetch_local_db/models/updateModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mean_lib/logger.dart';
 import 'package:mean_lib/local_db_helper.dart';
 
 class FetchLocalFF {
@@ -72,7 +73,7 @@ class FetchLocalFF {
       }
       //if update model is not null
       else {
-        Logger.warning("the databases have to have updateDate param");
+        log("the databases have to have updateDate param");
         try {
           if (kDebugMode) {
             print("*****UPDATE CONTROL: BEGINS");
@@ -165,7 +166,7 @@ class FetchLocalFF {
               : "ORDER BY ${localDatabase.compParam} DESC LIMIT 1");
       return theData[0][0][localDatabase.compParam];
     } catch (e) {
-      Logger.bigError(e.toString());
+      log(e.toString());
       throw ErrorDescription("Local Database _getBiggest crashed!!!");
     }
   }
@@ -176,7 +177,7 @@ class FetchLocalFF {
           parameters: "COUNT(*) AS total", tableName: localDatabase.tableName);
       return theData[0][0]["total"];
     } catch (e) {
-      Logger.bigError(e.toString());
+      log(e.toString());
       throw ErrorDescription("Local Database get count crashed!!!");
     }
   }
